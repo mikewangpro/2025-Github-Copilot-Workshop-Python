@@ -27,7 +27,8 @@ function updateTimerDisplay(seconds) {
 	const min = String(Math.floor(seconds / 60)).padStart(2, '0');
 	const sec = String(seconds % 60).padStart(2, '0');
 	timerText.textContent = `${min}:${sec}`;
-	drawCircularProgress(seconds / DEFAULT_DURATION);
+	const sessionDuration = isWorkSession ? DEFAULT_DURATION : BREAK_DURATION;
+	drawCircularProgress(seconds / sessionDuration);
 }
 
 // Attach event listeners to Start and Reset buttons
