@@ -42,3 +42,16 @@ htmlcov/
 venv/
 env/
 ENV/
+
+__pycache__/
+node_modules/
+test/__pycache__/
+dist/
+build/
+.env
+.DS_Store
+.vscode/
+.idea/
+*.log
+*.pyc
+*.pyo
