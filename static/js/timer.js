@@ -7,11 +7,12 @@ let timeLeft = DEFAULT_DURATION;
 let timerInterval = null;
 let isRunning = false;
 let isWorkSession = true;
-let completedSessions = 4; // Placeholder for demo
-let totalFocusTime = 100; // in minutes, placeholder for demo
+let completedSessions = 0;
+let totalFocusTime = 0;
 
 // Initialize timer display and event handlers
-function initializeTimer() {
+async function initializeTimer() {
+	await fetchProgressData();
 	updateSessionState(isWorkSession);
 	updateTimerDisplay(timeLeft);
 	drawCircularProgress(1);
@@ -47,10 +48,10 @@ function handleButtonEvents() {
 	}
 }
 
-function startTimer() {
+async function startTimer() {
 	if (isRunning) return;
 	isRunning = true;
-	timerInterval = setInterval(() => {
+	timerInterval = setInterval(async () => {
 		if (timeLeft > 0) {
 			timeLeft--;
 			updateTimerDisplay(timeLeft);
@@ -61,6 +62,7 @@ function startTimer() {
 			if (isWorkSession) {
 				completedSessions++;
 				totalFocusTime += DEFAULT_DURATION / 60;
+				await saveProgressData();
 			}
 			isWorkSession = !isWorkSession;
 			updateSessionState(isWorkSession);
@@ -69,6 +71,33 @@ function startTimer() {
 			updateProgress(completedSessions, totalFocusTime);
 		}
 	}, 1000);
+}
+// Fetch progress data from backend
+async function fetchProgressData() {
+	try {
+		const res = await fetch('/get_progress');
+		if (!res.ok) throw new Error('Failed to fetch progress');
+		const data = await res.json();
+		completedSessions = data.completed_sessions;
+		totalFocusTime = data.total_focus_minutes;
+	} catch (e) {
+		// fallback to 0 if error
+		completedSessions = 0;
+		totalFocusTime = 0;
+	}
+}
+
+// Save progress data to backend
+async function saveProgressData() {
+	try {
+		await fetch('/save_progress', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ work_session: true, focus_minutes: DEFAULT_DURATION / 60 })
+		});
+	} catch (e) {
+		// ignore error for now
+	}
 }
 
 function resetTimer() {
