@@ -187,6 +187,11 @@ document.addEventListener('DOMContentLoaded', initializeTimer);
 
 // Create particle animation effect for work sessions
 function createParticles() {
+	// Check if particles container already exists
+	if (document.querySelector('.particles')) {
+		return; // Don't create duplicates
+	}
+	
 	const particlesContainer = document.createElement('div');
 	particlesContainer.className = 'particles';
 	document.body.appendChild(particlesContainer);

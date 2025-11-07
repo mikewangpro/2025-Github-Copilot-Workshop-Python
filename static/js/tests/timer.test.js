@@ -1,6 +1,39 @@
 // timer.test.js
 // Basic unit tests for timer logic (example, not runnable in browser)
 
+// Shared utility function for color interpolation
+function interpolateColor(color1, color2, ratio) {
+    const hex = (color) => {
+        const c = color.substring(1);
+        return parseInt(c, 16);
+    };
+    
+    const r1 = (hex(color1) >> 16) & 255;
+    const g1 = (hex(color1) >> 8) & 255;
+    const b1 = hex(color1) & 255;
+    
+    const r2 = (hex(color2) >> 16) & 255;
+    const g2 = (hex(color2) >> 8) & 255;
+    const b2 = hex(color2) & 255;
+    
+    const r = Math.round(r1 + (r2 - r1) * ratio);
+    const g = Math.round(g1 + (g2 - g1) * ratio);
+    const b = Math.round(b1 + (b2 - b1) * ratio);
+    
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
+// Shared utility function for color progress
+function getColorForProgress(percent) {
+    if (percent > 0.5) {
+        const ratio = (percent - 0.5) / 0.5;
+        return interpolateColor('#7b6eea', '#f0c419', 1 - ratio);
+    } else {
+        const ratio = percent / 0.5;
+        return interpolateColor('#f0c419', '#e74c3c', 1 - ratio);
+    }
+}
+
 describe('Pomodoro Timer Logic', () => {
     test('should format time correctly', () => {
         function formatTime(seconds) {
@@ -22,27 +55,6 @@ describe('Pomodoro Timer Logic', () => {
     });
 
     test('should interpolate colors correctly', () => {
-        function interpolateColor(color1, color2, ratio) {
-            const hex = (color) => {
-                const c = color.substring(1);
-                return parseInt(c, 16);
-            };
-            
-            const r1 = (hex(color1) >> 16) & 255;
-            const g1 = (hex(color1) >> 8) & 255;
-            const b1 = hex(color1) & 255;
-            
-            const r2 = (hex(color2) >> 16) & 255;
-            const g2 = (hex(color2) >> 8) & 255;
-            const b2 = hex(color2) & 255;
-            
-            const r = Math.round(r1 + (r2 - r1) * ratio);
-            const g = Math.round(g1 + (g2 - g1) * ratio);
-            const b = Math.round(b1 + (b2 - b1) * ratio);
-            
-            return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-        }
-
         // Test color interpolation at 0% (should be first color)
         expect(interpolateColor('#7b6eea', '#f0c419', 0)).toBe('#7b6eea');
         
@@ -51,37 +63,6 @@ describe('Pomodoro Timer Logic', () => {
     });
 
     test('should calculate correct color for progress', () => {
-        function getColorForProgress(percent) {
-            function interpolateColor(color1, color2, ratio) {
-                const hex = (color) => {
-                    const c = color.substring(1);
-                    return parseInt(c, 16);
-                };
-                
-                const r1 = (hex(color1) >> 16) & 255;
-                const g1 = (hex(color1) >> 8) & 255;
-                const b1 = hex(color1) & 255;
-                
-                const r2 = (hex(color2) >> 16) & 255;
-                const g2 = (hex(color2) >> 8) & 255;
-                const b2 = hex(color2) & 255;
-                
-                const r = Math.round(r1 + (r2 - r1) * ratio);
-                const g = Math.round(g1 + (g2 - g1) * ratio);
-                const b = Math.round(b1 + (b2 - b1) * ratio);
-                
-                return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-            }
-
-            if (percent > 0.5) {
-                const ratio = (percent - 0.5) / 0.5;
-                return interpolateColor('#7b6eea', '#f0c419', 1 - ratio);
-            } else {
-                const ratio = percent / 0.5;
-                return interpolateColor('#f0c419', '#e74c3c', 1 - ratio);
-            }
-        }
-
         // At 100% (full time), should be blue
         expect(getColorForProgress(1)).toBe('#7b6eea');
         
