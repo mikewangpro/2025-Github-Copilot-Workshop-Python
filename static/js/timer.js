@@ -96,7 +96,7 @@ async function saveProgressData() {
 			body: JSON.stringify({ work_session: true, focus_minutes: DEFAULT_DURATION / 60 })
 		});
 	} catch (e) {
-		// ignore error for now
+		console.error('Failed to save progress data:', e);
 	}
 }
 
