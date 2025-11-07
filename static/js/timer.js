@@ -83,6 +83,7 @@ async function fetchProgressData() {
 		totalFocusTime = data.total_focus_minutes;
 	} catch (e) {
 		// fallback to 0 if error
+		console.error('Failed to fetch progress data:', e);
 		completedSessions = 0;
 		totalFocusTime = 0;
 	}
@@ -97,6 +98,7 @@ async function saveProgressData() {
 			body: JSON.stringify({ work_session: true, focus_minutes: DEFAULT_DURATION / 60 })
 		});
 	} catch (e) {
+		// ignore error for now
 		console.error('Failed to save progress data:', e);
 	}
 }
