@@ -18,6 +18,7 @@ async function initializeTimer() {
 	drawCircularProgress(1);
 	updateProgress(completedSessions, totalFocusTime);
 	handleButtonEvents();
+	createParticles();
 }
 
 // Update the timer text display (MM:SS)
@@ -139,7 +140,79 @@ function drawCircularProgress(percent) {
 	const circumference = 2 * Math.PI * radius;
 	circle.style.strokeDasharray = `${circumference}`;
 	circle.style.strokeDashoffset = `${circumference * (1 - percent)}`;
+	
+	// Animate color gradient: blue -> yellow -> red based on remaining time
+	const color = getColorForProgress(percent);
+	circle.style.stroke = color;
+}
+
+// Calculate color based on time progress (blue -> yellow -> red)
+function getColorForProgress(percent) {
+	// percent is the remaining time ratio (1.0 = full time, 0.0 = no time)
+	if (percent > 0.5) {
+		// Blue to yellow transition (100% - 50%)
+		const ratio = (percent - 0.5) / 0.5;
+		return interpolateColor('#7b6eea', '#f0c419', 1 - ratio);
+	} else {
+		// Yellow to red transition (50% - 0%)
+		const ratio = percent / 0.5;
+		return interpolateColor('#f0c419', '#e74c3c', 1 - ratio);
+	}
+}
+
+// Interpolate between two hex colors
+function interpolateColor(color1, color2, ratio) {
+	const hex = (color) => {
+		const c = color.substring(1);
+		return parseInt(c, 16);
+	};
+	
+	const r1 = (hex(color1) >> 16) & 255;
+	const g1 = (hex(color1) >> 8) & 255;
+	const b1 = hex(color1) & 255;
+	
+	const r2 = (hex(color2) >> 16) & 255;
+	const g2 = (hex(color2) >> 8) & 255;
+	const b2 = hex(color2) & 255;
+	
+	const r = Math.round(r1 + (r2 - r1) * ratio);
+	const g = Math.round(g1 + (g2 - g1) * ratio);
+	const b = Math.round(b1 + (b2 - b1) * ratio);
+	
+	return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
 // Initialize on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', initializeTimer);
+
+// Create particle animation effect for work sessions
+function createParticles() {
+	const particlesContainer = document.createElement('div');
+	particlesContainer.className = 'particles';
+	document.body.appendChild(particlesContainer);
+	
+	// Create 15 particles with random properties
+	for (let i = 0; i < 15; i++) {
+		const particle = document.createElement('div');
+		particle.className = 'particle';
+		
+		// Random size between 3px and 8px
+		const size = Math.random() * 5 + 3;
+		particle.style.width = `${size}px`;
+		particle.style.height = `${size}px`;
+		
+		// Random horizontal position
+		particle.style.left = `${Math.random() * 100}%`;
+		
+		// Random start position (bottom)
+		particle.style.top = `100%`;
+		
+		// Random animation delay
+		particle.style.animationDelay = `${Math.random() * 20}s`;
+		
+		// Random animation duration variation
+		particle.style.animationDuration = `${15 + Math.random() * 10}s`;
+		
+		particlesContainer.appendChild(particle);
+	}
+}
