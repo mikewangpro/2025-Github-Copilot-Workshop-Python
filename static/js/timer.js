@@ -2,14 +2,20 @@
 
 // Default timer duration in seconds (25 minutes)
 const DEFAULT_DURATION = 25 * 60;
+const BREAK_DURATION = 5 * 60;
 let timeLeft = DEFAULT_DURATION;
 let timerInterval = null;
 let isRunning = false;
+let isWorkSession = true;
+let completedSessions = 4; // Placeholder for demo
+let totalFocusTime = 100; // in minutes, placeholder for demo
 
 // Initialize timer display and event handlers
 function initializeTimer() {
+	updateSessionState(isWorkSession);
 	updateTimerDisplay(timeLeft);
 	drawCircularProgress(1);
+	updateProgress(completedSessions, totalFocusTime);
 	handleButtonEvents();
 }
 
@@ -51,7 +57,16 @@ function startTimer() {
 		} else {
 			clearInterval(timerInterval);
 			isRunning = false;
-			// Optionally: play sound or show notification
+			// Switch between work and break sessions
+			if (isWorkSession) {
+				completedSessions++;
+				totalFocusTime += DEFAULT_DURATION / 60;
+			}
+			isWorkSession = !isWorkSession;
+			updateSessionState(isWorkSession);
+			timeLeft = isWorkSession ? DEFAULT_DURATION : BREAK_DURATION;
+			updateTimerDisplay(timeLeft);
+			updateProgress(completedSessions, totalFocusTime);
 		}
 	}, 1000);
 }
@@ -59,8 +74,31 @@ function startTimer() {
 function resetTimer() {
 	clearInterval(timerInterval);
 	isRunning = false;
+	isWorkSession = true;
 	timeLeft = DEFAULT_DURATION;
+	updateSessionState(isWorkSession);
 	updateTimerDisplay(timeLeft);
+}
+
+// Switch between work and break session UI
+function updateSessionState(isWork) {
+	const stateLabel = document.querySelector('.state-label');
+	if (!stateLabel) return;
+	stateLabel.textContent = isWork ? '作業中' : '休憩中';
+	// Optionally, change color or style based on state
+}
+
+// Update today's progress UI
+function updateProgress(completed, focusMinutes) {
+	const completedElem = document.querySelector('.progress-completed .progress-value');
+	const focusElem = document.querySelector('.progress-focus .progress-value');
+	if (completedElem) completedElem.textContent = completed;
+	if (focusElem) {
+		const hours = Math.floor(focusMinutes / 60);
+		const mins = focusMinutes % 60;
+		focusElem.textContent =
+			(hours > 0 ? `${hours}時間` : '') + (mins > 0 ? `${mins}分` : (hours === 0 ? '0分' : ''));
+	}
 }
 
 // Draw circular progress bar (percent: 1.0 = full, 0.0 = empty)
